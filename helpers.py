@@ -22,9 +22,51 @@ import scipy.misc
 import imageio
 
 
+def loadcheckpoint(G_XtoY, G_YtoX, D_X, D_Y, checkpoint_dir='checkpoints_cyclegan'):
+    try:
+
+
+        path = os.path.join(Params.path_abs, checkpoint_dir, 'G_XtoY.pkl')
+
+        state_dict = torch.load(path)
+        print(state_dict.keys())
+        G_XtoY.load_state_dict(state_dict)
+
+        if os.path.exists(path):
+            state_dict = torch.load(path)
+            print(state_dict.keys())
+            G_XtoY.load_state_dict(state_dict)
+
+        path = os.path.join(Params.path_abs, checkpoint_dir, 'G_YtoX.pkl')
+        if os.path.exists(path):
+            state_dict = torch.load(path)
+            G_YtoX.load_state_dict(state_dict)
+
+        path = os.path.join(Params.path_abs, checkpoint_dir, 'D_X.pkl')
+        if os.path.exists(path):
+            state_dict = torch.load(path)
+            D_X.load_state_dict(state_dict)
+
+        path = os.path.join(Params.path_abs, checkpoint_dir, 'D_Y.pkl')
+        if os.path.exists(path):
+            state_dict = torch.load(path)
+            D_Y.load_state_dict(state_dict)
+
+        return G_XtoY, G_YtoX, D_X, D_Y
+    except Exception as ex:
+        print(ex)
+        return ex
+
+
 def checkpoint(iteration, G_XtoY, G_YtoX, D_X, D_Y, checkpoint_dir='checkpoints_cyclegan'):
     """Saves the parameters of both generators G_YtoX, G_XtoY and discriminators D_X, D_Y.
         """
+
+    checkpoint_dir = os.path.join(Params.path_abs, checkpoint_dir)
+
+    if not os.path.exists(checkpoint_dir):
+        os.makedirs(checkpoint_dir)
+
     G_XtoY_path = os.path.join(checkpoint_dir, 'G_XtoY.pkl')
     G_YtoX_path = os.path.join(checkpoint_dir, 'G_YtoX.pkl')
     D_X_path = os.path.join(checkpoint_dir, 'D_X.pkl')
@@ -62,7 +104,7 @@ def to_data(x):
     return x
 
 
-def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sample_dir=Params.path_samples):
+def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sample_dir='samples_cyclegan'):
     """Saves samples from both generators X->Y and Y->X.
         """
     # move input data to correct device
@@ -73,6 +115,8 @@ def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sam
 
     X, fake_X = to_data(fixed_X), to_data(fake_X)
     Y, fake_Y = to_data(fixed_Y), to_data(fake_Y)
+
+    sample_dir = os.path.join(Params.path_abs, sample_dir)
 
     if not os.path.exists(sample_dir):
         os.makedirs(sample_dir)
@@ -86,3 +130,4 @@ def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sam
     path = os.path.join(sample_dir, 'sample-{:06d}-Y-X.png'.format(iteration))
     imageio.imwrite(path, merged)
     print('Saved {}'.format(path))
+

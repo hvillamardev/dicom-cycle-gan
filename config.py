@@ -10,4 +10,3 @@ class Params:
     path_abs = CFG[PRM]['path_abs']
     path_dcm = os.path.join(path_abs, 'DCM')
     path_jpg = os.path.join(path_abs, 'JPG')
-    path_samples = os.path.join(path_abs, 'samples_cyclegan')
