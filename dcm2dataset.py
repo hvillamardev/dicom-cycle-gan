@@ -54,13 +54,16 @@ class DicomDataset(Dataset):
         return files
 
     def __getitem__(self, index):
-        image_file = pydicom.dcmread(os.path.join(self.image_dir, self.data[index][1], self.data[index][0]))
-        image = np.array(image_file.pixel_array, dtype=np.float32)[np.newaxis]  # Add channel dimension
-        image = (image - np.min(image)) / np.ptp(image)
+        try:
+            image_file = pydicom.dcmread(os.path.join(self.image_dir, self.data[index][1], self.data[index][0]), force=True)
+            image = np.array(image_file.pixel_array, dtype=np.float32)[np.newaxis]  # Add channel dimension
+            image = (image - np.min(image)) / np.ptp(image)
 
-        image = torch.from_numpy(image)
-        label = float(self.data[index][1])
-        if self.transform:
-            image = self.transform(image)
+            image = torch.from_numpy(image)
+            label = float(self.data[index][1])
+            if self.transform:
+                image = self.transform(image)
 
-        return image, label
+            return image, label
+        except Exception as ex:
+            return None, None
